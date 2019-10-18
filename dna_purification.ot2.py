@@ -176,12 +176,11 @@ def run_custom_protocol(
                              dest, air_gap=air_vol_p50, blow_out=True)
 
 
-# Plate type can be: biorad, microamp, strip
-run_custom_protocol(**{'sample_number': 8,
-                       'plate_type': 'strip',
+run_custom_protocol(**{'sample_number': 4,     # up to 24 samples
+                       'plate_type': 'strip',  # 'biorad' or 'microamp' or 'strip'
                        'sample_volume': 25.0,
                        'bead_ratio': 1.4,
                        'elution_buffer_volume': 25.0,
-                       'incubation_time': 0.5,
-                       'settling_time': 0.5,
-                       'drying_time': 0.5})
+                       'incubation_time': 0.5, # time before the magnet and after elution in minutes
+                       'settling_time': 0.5,   # time on the magnet in minutes
+                       'drying_time': 0.5})    # drying time in minutes
