@@ -114,8 +114,7 @@ def run_custom_protocol(
     # Dispense beads
     pipette_p50.set_flow_rate(dispense=50)
     pipette_p50.distribute(bead_volume,
-                           beads, magplate_samples,
-                           touch_tip=True)
+                           beads, magplate_samples)
 
     # Mix beads and PCR samples
     for target, dest in zip(magplate_samples, samples):
@@ -144,7 +143,7 @@ def run_custom_protocol(
         for target in magplate:
             pipette_p300.transfer(150, ethanol, target, air_gap=air_vol_p300,
                                   new_tip='always')
-            pipette_p300.delay(seconds=30)
+        pipette_p300.delay(seconds=30)
         for target in magplate:
             pipette_p300.transfer(170, target, liquid_waste, air_gap=air_vol_p300,
                                   new_tip='always')
@@ -160,7 +159,7 @@ def run_custom_protocol(
         pipette_p300.pick_up_tip()
         pipette_p300.transfer(elution_buffer_volume,
                               elution_buffer, target, new_tip='never')
-        pipette_p300.mix(20, mix_vol, target)
+        pipette_p300.mix(10, mix_vol, target)
         pipette_p300.drop_tip()
 
     # Incubate at RT for x minutes
