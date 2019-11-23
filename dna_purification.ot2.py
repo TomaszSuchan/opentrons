@@ -25,10 +25,8 @@ if 'brand-8-strip-standard' not in labware.list():
         volume=200)              # volume (µL) of each well
 
 mag_deck = modules.load('magdeck', '1')
-input_plate = labware.load(
-    'opentrons_96_aluminumblock_generic_pcr_strip_200ul', '2')
-output_plate = labware.load(
-    'opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', '3')
+input_plate = labware.load('brand-8-strip-standard', '2')
+output_plate = labware.load('opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', '3')
 waste_container = labware.load('agilent_1_reservoir_290ml', '9')
 
 
@@ -54,16 +52,11 @@ def run_custom_protocol(
         magdeck_height = 22
 
     # p300
-    total_tips = sample_number * 8 + 1
-    tiprack_num = total_tips // 96 + (1 if total_tips % 96 > 0 else 0)
-    tips_slots = ['7', '8', '10'][:tiprack_num]
-    tipracks_p300 = [labware.load(
-        'opentrons_96_filtertiprack_200ul', slot) for slot in tips_slots]
-    if sample_number <= 4:
-        pipette_p300 = instruments.P300_Single(
-            mount='right',
-            tip_racks=tipracks_p300)
-    else:
+        col_num = sample_number // 8 + (1 if sample_number % 8 > 0 else 0)
+        tiprack_num = col_num // 12 + (1 if col_num % 12 > 0 else 0)
+        tips_slots = ['7', '8', '10'][:tiprack_num]
+        tipracks_p300 = [labware.load(
+            'opentrons_96_filtertiprack_200ul', slot) for slot in tips_slots]
         pipette_p300 = instruments.P300_Multi(
             mount='right',
             tip_racks=tipracks_p300)
@@ -90,10 +83,11 @@ def run_custom_protocol(
     else:
         reagent_container = labware.load(
             'usascientific_12_reservoir_22ml', '4')
-        beads = reagent_container.wells(0)
+        reagent_container2 = labware.load(
+            'opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', '5')
+        beads = reagent_container2.wells(0)
         elution_buffer = reagent_container.wells(1)
-        ethanol = reagent_container.wells(12)
-        col_num = sample_number // 8 + (1 if sample_number % 8 > 0 else 0)
+        ethanol = reagent_container.wells(11)
         magplate = [col for col in mag_plate.cols()[:col_num]]
 
     samples = [well for well in input_plate.wells()[:sample_number]]
@@ -117,20 +111,20 @@ def run_custom_protocol(
                            beads, magplate_samples)
 
     # Mix beads and PCR samples
-    for target, dest in zip(magplate_samples, samples):
-        pipette_p50.pick_up_tip()
-        pipette_p50.transfer(sample_volume, dest, target,
+    for target, dest in zip(magplate, samples):
+        pipette_p300.pick_up_tip()
+        pipette_p300.transfer(sample_volume, dest, target,
                              new_tip='never', air_gap=air_vol_p50)
-        pipette_p50.mix(10, mix_vol, target)
-        pipette_p50.blow_out()
-        pipette_p50.drop_tip()
+        pipette_p300.mix(10, mix_vol, target)
+        pipette_p300.blow_out()
+        pipette_p300.drop_tip()
 
     # Incubate beads and PCR product at RT for 5 minutes
-    pipette_p50.delay(minutes=incubation_time)
+    pipette_p300.delay(minutes=incubation_time)
 
     # Engagae MagDeck and incubate
     mag_deck.engage(height=magdeck_height)
-    pipette_p50.delay(minutes=settling_time)
+    pipette_p300.delay(minutes=settling_time)
 
     # Remove supernatant from magnetic beads
     pipette_p300.set_flow_rate(aspirate=25, dispense=150)
@@ -139,14 +133,15 @@ def run_custom_protocol(
                               air_gap=air_vol_p300, blow_out=True)
 
     # Wash beads twice with 70% ethanol
+    pipette_p300.set_flow_rate(aspirate=25, dispense=25)
     for cycle in range(2):
         for target in magplate:
-            pipette_p300.transfer(150, ethanol, target, air_gap=air_vol_p300,
-                                  new_tip='always')
+            pipette_p300.transfer(150, ethanol, target, new_tip='always')
         pipette_p300.delay(seconds=30)
         for target in magplate:
-            pipette_p300.transfer(170, target, liquid_waste, air_gap=air_vol_p300,
-                                  new_tip='always')
+            pipette_p300.transfer(170, target, liquid_waste, new_tip='always')
+    for target in magplate:
+        pipette_p300.transfer(170, target, liquid_waste, new_tip='always')
 
     # Dry at RT
     pipette_p300.delay(minutes=drying_time)
@@ -174,12 +169,14 @@ def run_custom_protocol(
         pipette_p50.transfer(elution_buffer_volume, target,
                              dest, air_gap=air_vol_p50, blow_out=True)
 
+    # Disengage MagDeck
+    mag_deck.disengage()
 
-run_custom_protocol(**{'sample_number': 4,     # up to 24 samples
-                       'plate_type': 'strip',  # 'biorad' or 'microamp' or 'strip'
+run_custom_protocol(**{'sample_number': 8,     # up to 24 samples
+                       'plate_type': 'biorad',  # 'biorad' or 'microamp' or 'strip'
                        'sample_volume': 25.0,
                        'bead_ratio': 1.4,
                        'elution_buffer_volume': 25.0,
-                       'incubation_time': 0.5, # time before the magnet and after elution in minutes
-                       'settling_time': 0.5,   # time on the magnet in minutes
-                       'drying_time': 0.5})    # drying time in minutes
+                       'incubation_time': 1, # time before the magnet and after elution in minutes
+                       'settling_time': 1,   # time on the magnet in minutes
+                       'drying_time': 4})    # drying time in minutes
