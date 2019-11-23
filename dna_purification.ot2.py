@@ -52,14 +52,14 @@ def run_custom_protocol(
         magdeck_height = 22
 
     # p300
-        col_num = sample_number // 8 + (1 if sample_number % 8 > 0 else 0)
-        tiprack_num = col_num // 12 + (1 if col_num % 12 > 0 else 0)
-        tips_slots = ['7', '8', '10'][:tiprack_num]
-        tipracks_p300 = [labware.load(
-            'opentrons_96_filtertiprack_200ul', slot) for slot in tips_slots]
-        pipette_p300 = instruments.P300_Multi(
-            mount='right',
-            tip_racks=tipracks_p300)
+    col_num = sample_number // 8 + (1 if sample_number % 8 > 0 else 0)
+    tiprack_num = col_num // 12 + (1 if col_num % 12 > 0 else 0)
+    tips_slots = ['7', '8', '10'][:tiprack_num]
+    tipracks_p300 = [labware.load(
+        'opentrons_96_filtertiprack_200ul', slot) for slot in tips_slots]
+    pipette_p300 = instruments.P300_Multi(
+        mount='right',
+        tip_racks=tipracks_p300)
 
     # p50
     tipracks_p50 = [labware.load('opentrons_96_filtertiprack_200ul', '11')]
