@@ -1,4 +1,5 @@
 from opentrons import labware, instruments, modules
+import math
 
 metadata = {
     'protocolName': 'AMPure DNA Purification',
@@ -86,7 +87,7 @@ def run_custom_protocol(
         reagent_container2 = labware.load(
             'opentrons_24_tuberack_eppendorf_1.5ml_safelock_snapcap', '5')
         beads = reagent_container2.wells(0)
-        elution_buffer = reagent_container.wells(1)
+        elution_buffer = reagent_container.wells(0)
         ethanol = reagent_container.wells(11)
         magplate = [col for col in mag_plate.cols()[:col_num]]
 
@@ -150,11 +151,17 @@ def run_custom_protocol(
     mag_deck.disengage()
 
     # Mix beads with elution buffer
-    for target in magplate:
+    for i, target in enumerate(magplate):
+        side = 0 if i%2 == 0 else math.pi
+        disp_loc = (target, target.from_center(r=0.9, h=0, theta=side))
+
         pipette_p300.pick_up_tip()
-        pipette_p300.transfer(elution_buffer_volume,
-                              elution_buffer, target, new_tip='never')
-        pipette_p300.mix(10, mix_vol, target)
+        pipette_p300.aspirate(elution_buffer_volume, elution_buffer)
+        pipette_p300.dispense(elution_buffer_volume, target)
+        for n in range(5):
+            pipette_p300.aspirate(mix_vol, target)
+            pipette_p300.dispense(mix_vol, disp_loc)
+        pipette_p300.mix(5, mix_vol, target)
         pipette_p300.drop_tip()
 
     # Incubate at RT for x minutes
@@ -177,6 +184,6 @@ run_custom_protocol(**{'sample_number': 8,     # up to 24 samples
                        'sample_volume': 25.0,
                        'bead_ratio': 1.4,
                        'elution_buffer_volume': 25.0,
-                       'incubation_time': 1, # time before the magnet and after elution in minutes
-                       'settling_time': 1,   # time on the magnet in minutes
-                       'drying_time': 4})    # drying time in minutes
+                       'incubation_time': 0.3, # time before the magnet and after elution in minutes
+                       'settling_time': 0.3,   # time on the magnet in minutes
+                       'drying_time': 0.3})    # drying time in minutes
