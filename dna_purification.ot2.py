@@ -153,6 +153,7 @@ def run_custom_protocol(
     # Mix beads with elution buffer
     for i, target in enumerate(magplate):
         side = 0 if i%2 == 0 else math.pi
+        move_loc = (target, target.from_center(r=0, h=-0.8, theta=side))
         disp_loc = (target, target.from_center(r=0.9, h=0, theta=side))
 
         pipette_p300.pick_up_tip()
@@ -160,6 +161,7 @@ def run_custom_protocol(
         pipette_p300.dispense(elution_buffer_volume, target)
         for n in range(5):
             pipette_p300.aspirate(mix_vol, target)
+            pipette_p300.move_to(move_loc)
             pipette_p300.dispense(mix_vol, disp_loc)
         pipette_p300.mix(5, mix_vol, target)
         pipette_p300.drop_tip()
