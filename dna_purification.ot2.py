@@ -186,6 +186,6 @@ run_custom_protocol(**{'sample_number': 8,     # up to 24 samples
                        'sample_volume': 25.0,
                        'bead_ratio': 1.4,
                        'elution_buffer_volume': 25.0,
-                       'incubation_time': 0.3, # time before the magnet and after elution in minutes
-                       'settling_time': 0.3,   # time on the magnet in minutes
-                       'drying_time': 0.3})    # drying time in minutes
+                       'incubation_time': 5, # time before the magnet and after elution in minutes
+                       'settling_time': 1,   # time on the magnet in minutes
+                       'drying_time': 4})    # drying time in minutes
