@@ -43,7 +43,7 @@ In general, I usually put only the racks/modules/tip boxes during the calibratio
 ## Protocols
 
 ### DNA purification with AMPure
-Protocol requires megnetic modile. The script is configured using `run_custom_protocol` function. For sample number equal or less than 4 single-channel pipettes are used and for more one multichannel and one single-channel pipette is used.
+Protocol requires magnetic module. The script is configured using `run_custom_protocol` function. For sample number equal or less than 4 single-channel pipettes are used and for more one multichannel and one single-channel pipette is used.
 
 Reagents for <=4 samples:
 - ethanol in 50 ml Falcon tube: well 1, slot 5
@@ -57,6 +57,8 @@ Reagents for >4 samples:
 
 TO DO:
 - rewrite for Opentrons API 2.0
+
+![Deck set up](dna_purification.png)
 
 ### Hybridization wash protocol for MyBaits v4
 
